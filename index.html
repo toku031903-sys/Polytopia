@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ポリトピアの戦い">
+<meta property="og:description" content="2〜4人で遊べるストラテジーゲーム">
+<meta property="og:image" content="https://toku031903-sys.github.io/Polytopia/IMG_1716.jpeg">
+<meta property="og:url" content="https://toku031903-sys.github.io/Polytopia/">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ポリトピアの戦い">
+<meta name="twitter:description" content="2〜4人で遊べるストラテジーゲーム">
+<meta name="twitter:image" content="https://toku031903-sys.github.io/Polytopia/IMG_1716.jpeg">
+
+<title>ポリトピアの戦い</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --accent: #c9a84c;
+    --accent2: #e8c97a;
+    --red: #e05252;
+    --blue: #4a9eed;
+    --green: #52c27a;
+    --purple: #9b6fd4;
+    --text: #e8dcc8;
+    --text2: #9b9080;
+    --border: #2a3347;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ===== LOBBY ===== */
+  #lobby {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 30%, #1a2a4a 0%, #0a0e1a 70%);
+    padding: 20px;
+  }
+
+  .lobby-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(201,168,76,0.4), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .lobby-sub {
+    font-size: 1.1rem;
+    color: var(--text2);
+    letter-spacing: 0.2em;
+    margin-bottom: 60px;
+    font-style: italic;
+  }
+
+  .lobby-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .lobby-box h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 24px;
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text2);
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .input-group input, .input-group select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input-group input:focus, .input-group select:focus {
+    border-color: var(--accent);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #c9a84c, #e8c97a);
+    color: #1a1200;
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,168,76,0.4); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .divider {
+    text-align: center;
+    color: var(--text2);
+    font-size: 0.85rem;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  /* ===== GAME LAYOUT ===== */
+  #game { display: none; width: 100vw; height: 100vh; overflow: hidden; position: relative; }
+
+  #canvas-container {
+    position: absolute;
+    inset: 0;
+    background: #060d1a;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  canvas { display: block; }
+
+  /* ===== HUD ===== */
+  #hud-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: linear-gradient(to bottom, rgba(6,13,26,0.98), rgba(6,13,26,0.7));
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+  }
+
+  .hud-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+
+  .player-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .hud-player span {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .hud-center {
+    flex: 1;
+    text-align: center;
+  }
+
+  .turn-info {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .stars-display {
+    font-size: 0.8rem;
+    color: var(--text2);
+  }
+
+  .stars-display span {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  #btn-end-turn {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #c9a84c, #e8c97a);
+    border: none;
+    border-radius: 8px;
+    color: #1a1200;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  #btn-end-turn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.4); }
+  #btn-end-turn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ===== INFO PANEL ===== */
+  #info-panel {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(6,13,26,0.99), rgba(6,13,26,0.8));
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    min-height: 100px;
+    max-height: 220px;
+    z-index: 10;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .info-main {
+    flex: 1;
+  }
+
+  .info-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .info-desc {
+    font-size: 0.9rem;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+
+  .info-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 60px;
+  }
+
+  .stat-val {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+
+  .stat-lbl {
+    font-size: 0.7rem;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  /* action buttons */
+  .action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 130px;
+  }
+
+  .action-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .action-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--bg3);
+    color: var(--accent);
+  }
+
+  .action-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .action-btn.danger {
+    border-color: #5a2020;
+    color: var(--red);
+  }
+
+  .action-btn.danger:hover:not(:disabled) {
+    border-color: var(--red);
+    background: #2a1010;
+  }
+
+  /* ===== TECH TREE ===== */
+  #tech-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #tech-overlay.open { display: block; }
+
+  .tech-header {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .tech-stars {
+    text-align: center;
+    color: var(--text2);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto 20px;
+  }
+
+  .tech-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tech-card:hover:not(.locked):not(.owned) {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(201,168,76,0.2);
+  }
+
+  .tech-card.owned {
+    border-color: var(--green);
+    background: rgba(82,194,122,0.08);
+    cursor: default;
+  }
+
+  .tech-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .tech-icon { font-size: 2rem; margin-bottom: 8px; }
+  .tech-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tech-cost {
+    font-size: 0.8rem;
+    color: var(--accent2);
+  }
+
+  .tech-desc {
+    font-size: 0.75rem;
+    color: var(--text2);
+    margin-top: 6px;
+    line-height: 1.3;
+  }
+
+  .tech-close {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 40px;
+  }
+
+  /* ===== STATUS MSG ===== */
+  #status-msg {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,14,26,0.95);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #status-msg.show { opacity: 1; }
+
+  /* ===== WINNER ===== */
+  #winner-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 30;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  #winner-overlay.show { display: flex; }
+
+  .winner-title {
+    font-family: 'Cinzel', serif;
+    font-size: 3rem;
+    color: var(--accent);
+    text-shadow: 0 0 60px rgba(201,168,76,0.5);
+    margin-bottom: 16px;
+  }
+
+  .winner-sub {
+    font-size: 1.2rem;
+    color: var(--text2);
+    margin-bottom: 40px;
+  }
+
+  /* ===== TECH BTN ===== */
+  #btn-tech {
+    position: absolute;
+    bottom: 130px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 1.4rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  #btn-tech:hover { border-color: var(--accent); background: var(--bg3); }
+
+  /* waiting */
+  .waiting-banner {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,14,26,0.97);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 32px;
+    text-align: center;
+    z-index: 12;
+  }
+
+  .waiting-banner p {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .waiting-banner .room-id {
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    font-weight: 700;
+  }
+
+  #copy-link-btn {
+    margin-top: 8px;
+    padding: 6px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  #copy-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- LOBBY -->
+<div id="lobby">
+  <div class="lobby-title">⚔ POLYWARS</div>
+  <div class="lobby-sub">無料リアルタイム戦略対戦</div>
+  <div class="lobby-box">
+    <h2>ENTER THE BATTLEFIELD</h2>
+    <div class="input-group">
+      <label>あなたの名前</label>
+      <input type="text" id="player-name" placeholder="司令官名..." maxlength="16" value="">
+    </div>
+    <div class="input-group">
+      <label>部族</label>
+      <select id="tribe-select">
+        <option value="forest">🌲 フォレスト族（弓術）</option>
+        <option value="mountain">⛰ マウンテン族（採掘）</option>
+        <option value="sea">🌊 シー族（航海）</option>
+        <option value="plains">🌾 プレインズ族（農業）</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="createRoom()">🗡 新しい部屋を作る</button>
+    <div class="divider">または</div>
+    <div class="input-group">
+      <label>ルームIDで参加</label>
+      <input type="text" id="join-room-id" placeholder="ROOM-XXXX" maxlength="12" style="text-transform:uppercase">
+    </div>
+    <button class="btn btn-secondary" onclick="joinRoom()">🚪 参加する</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div id="canvas-container">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <!-- HUD Top -->
+  <div id="hud-top">
+    <div class="hud-player" id="p1-hud">
+      <div class="player-dot" id="p1-dot"></div>
+      <span id="p1-name">P1</span>
+    </div>
+    <div class="hud-center">
+      <div class="turn-info" id="turn-info">ターン 1</div>
+      <div class="stars-display">★ <span id="my-stars">0</span></div>
+    </div>
+    <div class="hud-player" id="p2-hud">
+      <div class="player-dot" id="p2-dot"></div>
+      <span id="p2-name">P2</span>
+    </div>
+    <button id="btn-end-turn" onclick="endTurn()">ターン終了</button>
+  </div>
+
+  <!-- Tech btn -->
+  <button id="btn-tech" onclick="toggleTech()" title="技術開発">🔬</button>
+
+  <!-- Info Panel -->
+  <div id="info-panel">
+    <div class="info-main">
+      <div class="info-title" id="info-title">マップをクリックして探索</div>
+      <div class="info-desc" id="info-desc">都市をクリックして開発、ユニットを選んで移動・攻撃。</div>
+      <div class="info-stats" id="info-stats"></div>
+    </div>
+    <div class="action-btns" id="action-btns"></div>
+  </div>
+
+  <!-- Status msg -->
+  <div id="status-msg"></div>
+
+  <!-- Waiting banner -->
+  <div class="waiting-banner" id="waiting-banner" style="display:none">
+    <p>友達を招待してください！ルームID:</p>
+    <div class="room-id" id="waiting-room-id"></div>
+    <button id="copy-link-btn" onclick="copyInviteLink()">🔗 リンクをコピー</button>
+    <p style="margin-top:8px;font-size:0.75rem">相手の参加を待っています...</p>
+  </div>
+
+  <!-- Tech Overlay -->
+  <div id="tech-overlay">
+    <div class="tech-header">⚗ 技術開発</div>
+    <div class="tech-stars">保有スター: <span id="tech-stars-count" style="color:var(--accent2);font-weight:700">0</span> ★</div>
+    <div class="tech-grid" id="tech-grid"></div>
+    <button class="btn btn-secondary tech-close" onclick="toggleTech()">閉じる</button>
+  </div>
+
+  <!-- Winner -->
+  <div id="winner-overlay">
+    <div class="winner-title">🏆 勝利！</div>
+    <div class="winner-sub" id="winner-name"></div>
+    <button class="btn btn-primary" style="width:200px" onclick="location.reload()">もう一度</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCFI6fF-jQ5uaO4Luq5dcRs1jMuJ5u96Co",
+  authDomain: "polytopia-d91bd.firebaseapp.com",
+  projectId: "polytopia-d91bd",
+  storageBucket: "polytopia-d91bd.firebasestorage.app",
+  messagingSenderId: "525579244471",
+  appId: "1:525579244471:web:c620210003b23ba70c0e32",
+  databaseURL: "https://polytopia-d91bd-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ===== CONSTANTS =====
+const HEX_SIZE = 40;
+const MAP_RADIUS = 7; // hex radius
+const PLAYER_COLORS = { p1: '#e05252', p2: '#4a9eed' };
+
+const TRIBES = {
+  forest:   { name: 'フォレスト', emoji: '🌲', startTech: 'archery' },
+  mountain: { name: 'マウンテン', emoji: '⛰',  startTech: 'mining' },
+  sea:      { name: 'シー',       emoji: '🌊', startTech: 'sailing' },
+  plains:   { name: 'プレインズ', emoji: '🌾', startTech: 'farming' },
+};
+
+const TECHS = {
+  farming:    { name: '農業', icon: '🌾', cost: 5,  requires: [], desc: '農場を建設可能。毎ターン+1スター', unlocks: ['building_farm'] },
+  mining:     { name: '採掘', icon: '⛏', cost: 5,  requires: [], desc: '鉱山を建設可能。毎ターン+1スター', unlocks: ['building_mine'] },
+  sailing:    { name: '航海', icon: '⛵', cost: 5,  requires: [], desc: '海上移動可能。ボートを生産', unlocks: ['unit_boat'] },
+  archery:    { name: '弓術', icon: '🏹', cost: 5,  requires: [], desc: '弓兵ユニットを生産可能', unlocks: ['unit_archer'] },
+  swordsmanship: { name: '剣術', icon: '⚔', cost: 6, requires: ['archery'], desc: '剣士ユニットを生産', unlocks: ['unit_swordsman'] },
+  riding:     { name: '騎馬', icon: '🐴', cost: 8,  requires: ['farming'], desc: '騎兵ユニットを生産', unlocks: ['unit_cavalry'] },
+  construction: { name: '建築', icon: '🏛', cost: 8, requires: ['mining'], desc: 'ポートを建設可能', unlocks: ['building_port'] },
+  spiritualism: { name: '精霊術', icon: '✨', cost: 10, requires: ['farming', 'archery'], desc: '巫女ユニット(HP回復)を生産', unlocks: ['unit_shaman'] },
+};
+
+const UNITS = {
+  warrior:    { name: '戦士',  icon: '🗡', hp: 10, maxHp: 10, atk: 2, def: 1, move: 1, range: 1, cost: 2 },
+  archer:     { name: '弓兵',  icon: '🏹', hp: 8,  maxHp: 8,  atk: 2, def: 0, move: 1, range: 2, cost: 3, req: 'archery' },
+  swordsman:  { name: '剣士',  icon: '⚔',  hp: 15, maxHp: 15, atk: 3, def: 2, move: 1, range: 1, cost: 4, req: 'swordsmanship' },
+  cavalry:    { name: '騎兵',  icon: '🐴', hp: 12, maxHp: 12, atk: 3, def: 1, move: 2, range: 1, cost: 5, req: 'riding' },
+  boat:       { name: 'ボート',icon: '⛵', hp: 8,  maxHp: 8,  atk: 1, def: 1, move: 2, range: 1, cost: 4, req: 'sailing' },
+  shaman:     { name: '巫女',  icon: '✨', hp: 8,  maxHp: 8,  atk: 1, def: 0, move: 1, range: 1, cost: 4, req: 'spiritualism', heal: 3 },
+};
+
+// ===== STATE =====
+let G = {}; // full game state from Firebase
+let myId = null; // 'p1' or 'p2'
+let roomId = null;
+let selectedHex = null;
+let selectedUnit = null;
+let highlightedHexes = [];
+let canvas, ctx;
+let camX = 0, camY = 0;
+let isDragging = false, dragStart = null;
+let gameRef = null;
+
+// ===== HEX UTILS =====
+function hexToPixel(q, r) {
+  const x = HEX_SIZE * (Math.sqrt(3) * q + Math.sqrt(3)/2 * r);
+  const y = HEX_SIZE * (3/2 * r);
+  return { x, y };
+}
+
+function pixelToHex(px, py) {
+  const q = (Math.sqrt(3)/3 * px - 1/3 * py) / HEX_SIZE;
+  const r = (2/3 * py) / HEX_SIZE;
+  return hexRound(q, r);
+}
+
+function hexRound(q, r) {
+  const s = -q - r;
+  let rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
+  const dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
+  if (dq > dr && dq > ds) rq = -rr - rs;
+  else if (dr > ds) rr = -rq - rs;
+  return { q: rq, r: rr };
+}
+
+function hexKey(q, r) { return `${q},${r}`; }
+
+function hexDistance(q1, r1, q2, r2) {
+  return (Math.abs(q1-q2) + Math.abs(q1+r1-q2-r2) + Math.abs(r1-r2)) / 2;
+}
+
+function hexNeighbors(q, r) {
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,-1],[-1,1]];
+  return dirs.map(([dq,dr]) => ({ q: q+dq, r: r+dr }));
+}
+
+// ===== MAP GENERATION =====
+
+// シードベース乱数 (mulberry32)
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function generateMap(seed) {
+  const rng = makeRng(seed || 12345);
+  const tiles = {};
+
+  // --- 地形比率の制約 ---
+  // 水: 15-25%, 山: 15-25%, 森: 20-30%, 平原: 残り
+  // 点対称マップ: p1側(q<0)で地形を決め、反転してp2側に適用
+
+  const allHexes = [];
+  for (let q = -MAP_RADIUS; q <= MAP_RADIUS; q++) {
+    for (let r = -MAP_RADIUS; r <= MAP_RADIUS; r++) {
+      if (Math.abs(q + r) <= MAP_RADIUS) allHexes.push({ q, r });
+    }
+  }
+
+  // まず全タイルを plains で初期化
+  allHexes.forEach(({ q, r }) => {
+    tiles[hexKey(q, r)] = { q, r, type: 'plains', fog: true, building: null, resource: null };
+  });
+
+  // p1陣地側（q<=0）のhexリスト（中央q=0は共有）
+  const p1Hexes = allHexes.filter(h => h.q < 0);
+  const centerHexes = allHexes.filter(h => h.q === 0);
+
+  const totalHalf = p1Hexes.length;
+  const targetWater    = Math.floor(totalHalf * (0.15 + rng() * 0.10)); // 15-25%
+  const targetMountain = Math.floor(totalHalf * (0.15 + rng() * 0.10));
+  const targetForest   = Math.floor(totalHalf * (0.20 + rng() * 0.10));
+
+  // Fisher-Yates shuffle
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // 首都周辺3マスは plains 固定（部隊展開・序盤の公平性）
+  const p1Capital = { q: -5, r: 0 };
+  const p2Capital = { q: 5, r: 0 };
+  const safeZone = new Set();
+  [-5,-4,-3].forEach(q => {
+    for (let r = -1; r <= 1; r++) {
+      if (Math.abs(q + r) <= MAP_RADIUS) safeZone.add(hexKey(q, r));
+    }
+  });
+
+  const candidates = shuffle(p1Hexes.filter(h => !safeZone.has(hexKey(h.q, h.r))));
+
+  let wi = 0, mi = 0, fi = 0;
+  // 水クラスタリング（隣接しやすく）
+  const typed = new Set();
+  function assignType(h, type) {
+    tiles[hexKey(h.q, h.r)].type = type;
+    typed.add(hexKey(h.q, h.r));
+    // 点対称: (-q-r, r) → ミラー先
+    const mq = -h.q, mr = -h.r;  // 点対称（原点を中心に180度回転: q→-q, r→-r）
+    if (tiles[hexKey(mq, mr)]) {
+      tiles[hexKey(mq, mr)].type = type;
+      typed.add(hexKey(mq, mr));
+    }
+  }
+
+  // 水をクラスタ配置（隣接hex優先）
+  let placed = 0;
+  for (const h of candidates) {
+    if (typed.has(hexKey(h.q, h.r))) continue;
+    if (placed >= targetWater) break;
+    // 隣接に水があるほど確率UP（クラスタ化）
+    const neighbors = hexNeighbors(h.q, h.r);
+    const adjWater = neighbors.filter(n => tiles[hexKey(n.q, n.r)]?.type === 'water').length;
+    if (rng() < 0.25 + adjWater * 0.25) {
+      assignType(h, 'water');
+      placed++;
+    }
+  }
+  // 残り不足分をランダム配置
+  for (const h of candidates) {
+    if (typed.has(hexKey(h.q, h.r))) continue;
+    if (placed >= targetWater) break;
+    assignType(h, 'water');
+    placed++;
+  }
+
+  // 山・森も同様
+  let mPlaced = 0;
+  for (const h of candidates) {
+    if (typed.has(hexKey(h.q, h.r))) continue;
+    if (mPlaced >= targetMountain) break;
+    const neighbors = hexNeighbors(h.q, h.r);
+    const adj = neighbors.filter(n => tiles[hexKey(n.q, n.r)]?.type === 'mountain').length;
+    if (rng() < 0.2 + adj * 0.2) { assignType(h, 'mountain'); mPlaced++; }
+  }
+  for (const h of candidates) {
+    if (typed.has(hexKey(h.q, h.r))) continue;
+    if (mPlaced >= targetMountain) break;
+    assignType(h, 'mountain'); mPlaced++;
+  }
+
+  let fPlaced = 0;
+  for (const h of candidates) {
+    if (typed.has(hexKey(h.q, h.r))) continue;
+    if (fPlaced >= targetForest) break;
+    const neighbors = hexNeighbors(h.q, h.r);
+    const adj = neighbors.filter(n => tiles[hexKey(n.q, n.r)]?.type === 'forest').length;
+    if (rng() < 0.2 + adj * 0.2) { assignType(h, 'forest'); fPlaced++; }
+  }
+  for (const h of candidates) {
+    if (typed.has(hexKey(h.q, h.r))) continue;
+    if (fPlaced >= targetForest) break;
+    assignType(h, 'forest'); fPlaced++;
+  }
+
+  // 中央列（q=0）は独立ランダム（完全ランダムで戦略的中央争い）
+  centerHexes.forEach(h => {
+    const v = rng();
+    if (v < 0.2) tiles[hexKey(h.q, h.r)].type = 'water';
+    else if (v < 0.4) tiles[hexKey(h.q, h.r)].type = 'mountain';
+    else if (v < 0.6) tiles[hexKey(h.q, h.r)].type = 'forest';
+    // else plains
+  });
+
+  // --- リソース配置（対称） ---
+  // 地形に応じたリソース（水タイルにはなし）
+  allHexes.forEach(({ q, r }) => {
+    const t = tiles[hexKey(q, r)];
+    if (t.type === 'water') return;
+    if (t.building) return;
+    const v = rng();
+    if (t.type === 'mountain' && v < 0.5) t.resource = 'ore';
+    else if (t.type === 'plains' && v < 0.35) t.resource = 'grain';
+    else if (t.type === 'forest' && v < 0.3) t.resource = 'grain';
+  });
+
+  // --- 首都配置（対称保証） ---
+  ['plains'].forEach(_ => {
+    tiles[hexKey(p1Capital.q, p1Capital.r)].type = 'plains';
+    tiles[hexKey(p1Capital.q, p1Capital.r)].resource = null;
+    tiles[hexKey(p1Capital.q, p1Capital.r)].building = { type: 'capital', owner: 'p1', level: 1 };
+    tiles[hexKey(p2Capital.q, p2Capital.r)].type = 'plains';
+    tiles[hexKey(p2Capital.q, p2Capital.r)].resource = null;
+    tiles[hexKey(p2Capital.q, p2Capital.r)].building = { type: 'capital', owner: 'p2', level: 1 };
+  });
+
+  // セーフゾーンは plains に戻す
+  safeZone.forEach(k => {
+    if (tiles[k] && !tiles[k].building) tiles[k].type = 'plains';
+  });
+  // p2セーフゾーンも同様
+  [5,4,3].forEach(q => {
+    for (let r = -1; r <= 1; r++) {
+      const k = hexKey(q, r);
+      if (tiles[k] && !tiles[k].building) tiles[k].type = 'plains';
+    }
+  });
+
+  return { tiles, p1Start: p1Capital, p2Start: p2Capital };
+}
+
+function generateUnits(p1Start, p2Start) {
+  const units = {};
+  const uid1 = 'u_p1_1';
+  const uid2 = 'u_p2_1';
+  units[uid1] = { id: uid1, owner: 'p1', type: 'warrior', q: p1Start.q, r: p1Start.r, hp: 10, moved: false, attacked: false };
+  units[uid2] = { id: uid2, owner: 'p2', type: 'warrior', q: p2Start.q, r: p2Start.r, hp: 10, moved: false, attacked: false };
+  return units;
+}
+
+// ===== VISIBILITY =====
+function revealFog(tiles, units, playerId) {
+  // Reveal tiles near own units and buildings
+  const revealRadius = 2;
+  Object.values(units || {}).filter(u => u.owner === playerId).forEach(u => {
+    for (let dq = -revealRadius; dq <= revealRadius; dq++) {
+      for (let dr = -revealRadius; dr <= revealRadius; dr++) {
+        if (Math.abs(dq+dr) <= revealRadius) {
+          const k = hexKey(u.q + dq, u.r + dr);
+          if (tiles[k]) tiles[k].fog = false;
+        }
+      }
+    }
+  });
+  Object.values(tiles).forEach(t => {
+    if (t.building && t.building.owner === playerId) {
+      for (let dq = -revealRadius; dq <= revealRadius; dq++) {
+        for (let dr = -revealRadius; dr <= revealRadius; dr++) {
+          if (Math.abs(dq+dr) <= revealRadius) {
+            const k = hexKey(t.q + dq, t.r + dr);
+            if (tiles[k]) tiles[k].fog = false;
+          }
+        }
+      }
+    }
+  });
+  return tiles;
+}
+
+// ===== STARS =====
+function calcStars(state, playerId) {
+  let stars = state.players[playerId].stars || 0;
+  return stars;
+}
+
+function calcStarsPerTurn(state, playerId) {
+  let s = 1; // base
+  const tech = state.players[playerId].tech || [];
+  Object.values(state.tiles || {}).forEach(t => {
+    if (t.building && t.building.owner === playerId) {
+      if (t.building.type === 'capital') s += t.building.level;
+      if (t.building.type === 'city') s += t.building.level;
+      if (t.building.type === 'farm' && tech.includes('farming')) s += 1;
+      if (t.building.type === 'mine' && tech.includes('mining')) s += 1;
+    }
+  });
+  return s;
+}
+
+// ===== INIT GAME STATE =====
+function initGameState(p1Info, p2Info) {
+  const seed = Math.floor(Math.random() * 0xFFFFFFFF);
+  const { tiles, p1Start, p2Start } = generateMap(seed);
+  const units = generateUnits(p1Start, p2Start);
+  // reveal starting fog
+  revealFog(tiles, units, 'p1');
+  revealFog(tiles, units, 'p2');
+  return {
+    turn: 1,
+    currentPlayer: 'p1',
+    tiles,
+    units,
+    players: {
+      p1: { id: 'p1', name: p1Info.name, tribe: p1Info.tribe, stars: 5, tech: [TRIBES[p1Info.tribe].startTech] },
+      p2: { id: 'p2', name: p2Info.name, tribe: p2Info.tribe, stars: 5, tech: [TRIBES[p2Info.tribe].startTech] },
+    },
+    log: [],
+    winner: null,
+  };
+}
+
+// ===== DRAW =====
+const TILE_COLORS = {
+  plains:   '#2d4a1e',
+  forest:   '#1a3a1a',
+  mountain: '#3a3230',
+  water:    '#0a1e3a',
+};
+
+const TILE_STROKE = {
+  plains:   '#3d6a2e',
+  forest:   '#2a5a2a',
+  mountain: '#5a5250',
+  water:    '#0d2a50',
+};
+
+function drawHex(cx, cy, size, fillColor, strokeColor) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = Math.PI / 180 * (60 * i - 30);
+    const xi = cx + size * Math.cos(angle);
+    const yi = cy + size * Math.sin(angle);
+    i === 0 ? ctx.moveTo(xi, yi) : ctx.lineTo(xi, yi);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  ctx.strokeStyle = strokeColor || fillColor;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function draw() {
+  if (!G.tiles) return;
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.translate(W/2 + camX, H/2 + camY);
+
+  const localTiles = JSON.parse(JSON.stringify(G.tiles));
+  revealFog(localTiles, G.units, myId);
+
+  Object.values(localTiles).forEach(tile => {
+    const { x, y } = hexToPixel(tile.q, tile.r);
+    const key = hexKey(tile.q, tile.r);
+
+    if (tile.fog) {
+      drawHex(x, y, HEX_SIZE - 1, '#050810', '#080c18');
+      return;
+    }
+
+    // base color
+    let color = TILE_COLORS[tile.type];
+    let stroke = TILE_STROKE[tile.type];
+
+    // highlight selected
+    if (selectedHex && selectedHex.q === tile.q && selectedHex.r === tile.r) {
+      color = '#4a6a3a';
+      stroke = '#c9a84c';
+    }
+
+    // highlight move range
+    if (highlightedHexes.some(h => h.q === tile.q && h.r === tile.r)) {
+      color = '#2a4a5a';
+      stroke = '#4a9eed';
+    }
+
+    drawHex(x, y, HEX_SIZE - 1, color, stroke);
+
+    // resource icon
+    if (tile.resource) {
+      ctx.font = `${HEX_SIZE * 0.45}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.globalAlpha = 0.5;
+      ctx.fillText(tile.resource === 'ore' ? '⛏' : '🌾', x, y);
+      ctx.globalAlpha = 1;
+    }
+
+    // building
+    if (tile.building) {
+      const b = tile.building;
+      const ownerColor = PLAYER_COLORS[b.owner];
+      ctx.font = `${HEX_SIZE * 0.55}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(buildingIcon(b.type), x, y - 4);
+      // owner dot
+      ctx.beginPath();
+      ctx.arc(x + 14, y + 14, 5, 0, Math.PI * 2);
+      ctx.fillStyle = ownerColor;
+      ctx.fill();
+      // city level
+      if (b.level > 1) {
+        ctx.font = 'bold 9px Crimson Pro';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(b.level, x + 14, y + 14);
+      }
+    }
+  });
+
+  // Draw units
+  Object.values(G.units || {}).forEach(unit => {
+    const tile = G.tiles[hexKey(unit.q, unit.r)];
+    if (!tile || tile.fog) return;
+    const localTile = localTiles[hexKey(unit.q, unit.r)];
+    if (!localTile || localTile.fog) return;
+
+    const { x, y } = hexToPixel(unit.q, unit.r);
+    const udef = UNITS[unit.type];
+    const ownerColor = PLAYER_COLORS[unit.owner];
+    const isSelected = selectedUnit && selectedUnit.id === unit.id;
+
+    // selection ring
+    if (isSelected) {
+      ctx.beginPath();
+      ctx.arc(x, y, HEX_SIZE * 0.55, 0, Math.PI * 2);
+      ctx.strokeStyle = '#c9a84c';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    // unit circle
+    ctx.beginPath();
+    ctx.arc(x, y, HEX_SIZE * 0.38, 0, Math.PI * 2);
+    ctx.fillStyle = ownerColor + (unit.moved && unit.attacked ? '55' : 'bb');
+    ctx.fill();
+    ctx.strokeStyle = ownerColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // unit icon
+    ctx.font = `${HEX_SIZE * 0.4}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = unit.moved && unit.attacked ? 0.5 : 1.0;
+    ctx.fillText(udef.icon, x, y);
+    ctx.globalAlpha = 1.0;
+
+    // HP bar
+    const barW = HEX_SIZE * 0.7;
+    const barH = 4;
+    const bx = x - barW/2;
+    const by = y + HEX_SIZE * 0.35;
+    ctx.fillStyle = '#111';
+    ctx.fillRect(bx, by, barW, barH);
+    ctx.fillStyle = unit.hp / udef.maxHp > 0.5 ? '#52c27a' : '#e05252';
+    ctx.fillRect(bx, by, barW * (unit.hp / udef.maxHp), barH);
+  });
+
+  ctx.restore();
+}
+
+function buildingIcon(type) {
+  const icons = { capital: '🏰', city: '🏛', farm: '🌾', mine: '⛏', port: '⚓' };
+  return icons[type] || '🏗';
+}
+
+// ===== INPUT =====
+function onCanvasClick(e) {
+  if (!isMyTurn()) return;
+  const rect = canvas.getBoundingClientRect();
+  const px = e.clientX - rect.left - canvas.width/2 - camX;
+  const py = e.clientY - rect.top - canvas.height/2 - camY;
+  const { q, r } = pixelToHex(px, py);
+  const key = hexKey(q, r);
+  const tile = G.tiles[key];
+  if (!tile) return;
+
+  const localTiles = JSON.parse(JSON.stringify(G.tiles));
+  revealFog(localTiles, G.units, myId);
+  if (localTiles[key]?.fog) return;
+
+  // click on a unit
+  const clickedUnit = Object.values(G.units || {}).find(u => u.q === q && u.r === r);
+
+  if (selectedUnit) {
+    // if clicked on highlight → move or attack
+    const isHighlighted = highlightedHexes.some(h => h.q === q && h.r === r);
+    if (isHighlighted) {
+      if (clickedUnit && clickedUnit.owner !== myId) {
+        // attack
+        doAttack(selectedUnit, clickedUnit);
+      } else if (!clickedUnit) {
+        // move
+        doMove(selectedUnit, q, r);
+      }
+      selectedUnit = null;
+      highlightedHexes = [];
+      updateInfoPanel(null, null);
+      draw();
+      return;
+    }
+    // clicked elsewhere – deselect or select new
+    selectedUnit = null;
+    highlightedHexes = [];
+  }
+
+  if (clickedUnit && clickedUnit.owner === myId) {
+    selectedUnit = clickedUnit;
+    highlightedHexes = getReachableHexes(clickedUnit);
+    updateInfoPanel(tile, clickedUnit);
+  } else {
+    selectedHex = tile;
+    updateInfoPanel(tile, null);
+  }
+  draw();
+}
+
+function getReachableHexes(unit) {
+  const udef = UNITS[unit.type];
+  const reachable = [];
+  for (let dq = -udef.move; dq <= udef.move; dq++) {
+    for (let dr = -udef.move; dr <= udef.move; dr++) {
+      if (Math.abs(dq+dr) <= udef.move && (dq !== 0 || dr !== 0)) {
+        const nq = unit.q + dq, nr = unit.r + dr;
+        const k = hexKey(nq, nr);
+        const t = G.tiles[k];
+        if (!t) continue;
+        if (t.type === 'water' && unit.type !== 'boat') continue;
+        // can't move to tile occupied by own unit
+        const occupied = Object.values(G.units || {}).find(u => u.q === nq && u.r === nr && u.owner === myId);
+        if (occupied) continue;
+        reachable.push({ q: nq, r: nr });
+      }
+    }
+  }
+  // also show attack range
+  const uDef2 = UNITS[unit.type];
+  for (let dq = -(uDef2.range); dq <= uDef2.range; dq++) {
+    for (let dr = -(uDef2.range); dr <= uDef2.range; dr++) {
+      if (Math.abs(dq+dr) <= uDef2.range && (dq !== 0 || dr !== 0)) {
+        const nq = unit.q + dq, nr = unit.r + dr;
+        const enemy = Object.values(G.units || {}).find(u => u.q === nq && u.r === nr && u.owner !== myId);
+        if (enemy && !reachable.some(h => h.q === nq && h.r === nr)) {
+          reachable.push({ q: nq, r: nr });
+        }
+      }
+    }
+  }
+  return reachable;
+}
+
+// ===== ACTIONS =====
+async function doMove(unit, q, r) {
+  const updates = {};
+  updates[`units/${unit.id}/q`] = q;
+  updates[`units/${unit.id}/r`] = r;
+  updates[`units/${unit.id}/moved`] = true;
+
+  // reveal fog
+  const newState = JSON.parse(JSON.stringify(G));
+  newState.units[unit.id].q = q;
+  newState.units[unit.id].r = r;
+  revealFog(newState.tiles, newState.units, myId);
+  updates['tiles'] = newState.tiles;
+
+  // shaman heal
+  if (unit.type === 'shaman') {
+    Object.values(G.units || {}).filter(u => u.owner === myId && hexDistance(u.q,u.r,q,r) <= 1).forEach(u => {
+      const udef = UNITS[u.type];
+      const newHp = Math.min(u.hp + (UNITS.shaman.heal || 3), udef.maxHp);
+      updates[`units/${u.id}/hp`] = newHp;
+    });
+  }
+
+  // city capture
+  const tile = G.tiles[hexKey(q, r)];
+  if (tile?.building && tile.building.owner !== myId) {
+    updates[`tiles/${hexKey(q,r)}/building/owner`] = myId;
+    showStatus(`🏰 都市を占領！`);
+    checkWinCondition(updates);
+  }
+
+  await update(ref(db, `rooms/${roomId}/gameState`), updates);
+}
+
+async function doAttack(attacker, defender) {
+  const adef = UNITS[attacker.type];
+  const ddef = UNITS[defender.type];
+  const dist = hexDistance(attacker.q, attacker.r, defender.q, defender.r);
+  if (dist > adef.range) { showStatus('射程外です'); return; }
+  if (attacker.attacked) { showStatus('このターンは攻撃済みです'); return; }
+
+  const atkDmg = Math.max(1, adef.atk - ddef.def + Math.floor(Math.random() * 2));
+  const defDmg = adef.range === 1 ? Math.max(0, ddef.atk - adef.def + Math.floor(Math.random() * 2) - 1) : 0;
+
+  const newDefHp = defender.hp - atkDmg;
+  const newAtkHp = attacker.hp - defDmg;
+  const updates = {};
+  updates[`units/${attacker.id}/attacked`] = true;
+  updates[`units/${attacker.id}/moved`] = true;
+
+  if (newDefHp <= 0) {
+    updates[`units/${defender.id}`] = null;
+    showStatus(`⚔ ${ddef.name}を倒した！(${atkDmg}dmg)`);
+    // capture city if on it
+    const dt = G.tiles[hexKey(defender.q, defender.r)];
+    if (dt?.building && dt.building.owner !== myId) {
+      updates[`tiles/${hexKey(defender.q, defender.r)}/building/owner`] = myId;
+    }
+  } else {
+    updates[`units/${defender.id}/hp`] = newDefHp;
+    showStatus(`⚔ ${atkDmg}ダメージ！(相手残HP:${newDefHp})`);
+  }
+
+  if (newAtkHp <= 0) {
+    updates[`units/${attacker.id}`] = null;
+  } else if (defDmg > 0) {
+    updates[`units/${attacker.id}/hp`] = newAtkHp;
+  }
+
+  checkWinCondition(updates);
+  await update(ref(db, `rooms/${roomId}/gameState`), updates);
+}
+
+function checkWinCondition(updates) {
+  // count enemy capitals
+  const enemyId = myId === 'p1' ? 'p2' : 'p1';
+  const enemyCapital = Object.values(G.tiles).find(t => t.building?.type === 'capital' && t.building.owner === enemyId);
+  if (updates[`tiles/${hexKey(enemyCapital?.q, enemyCapital?.r)}/building/owner`] === myId) {
+    updates['winner'] = myId;
+  }
+}
+
+async function doProduceUnit(unitType) {
+  if (!selectedHex) return;
+  const tile = G.tiles[hexKey(selectedHex.q, selectedHex.r)];
+  if (!tile?.building || tile.building.owner !== myId) return;
+
+  const udef = UNITS[unitType];
+  if (!udef) return;
+  if (udef.req && !G.players[myId].tech.includes(udef.req)) {
+    showStatus('必要な技術がありません'); return;
+  }
+  const myStars = G.players[myId].stars;
+  if (myStars < udef.cost) { showStatus('スターが足りません'); return; }
+
+  const uid = `u_${myId}_${Date.now()}`;
+  const updates = {};
+  updates[`units/${uid}`] = {
+    id: uid, owner: myId, type: unitType,
+    q: selectedHex.q, r: selectedHex.r,
+    hp: udef.hp, moved: true, attacked: true,
+  };
+  updates[`players/${myId}/stars`] = myStars - udef.cost;
+  showStatus(`${udef.icon} ${udef.name}を生産！`);
+  await update(ref(db, `rooms/${roomId}/gameState`), updates);
+  updateInfoPanel(tile, null);
+}
+
+async function endTurn() {
+  if (!isMyTurn()) return;
+  const nextPlayer = myId === 'p1' ? 'p2' : 'p1';
+  const newTurn = myId === 'p2' ? G.turn + 1 : G.turn;
+
+  // earn stars
+  const earned = calcStarsPerTurn(G, myId);
+  const newStars = (G.players[myId].stars || 0) + earned;
+
+  // reset unit movement
+  const unitUpdates = {};
+  Object.values(G.units || {}).filter(u => u.owner === myId).forEach(u => {
+    unitUpdates[`units/${u.id}/moved`] = false;
+    unitUpdates[`units/${u.id}/attacked`] = false;
+  });
+
+  const updates = {
+    currentPlayer: nextPlayer,
+    turn: newTurn,
+    [`players/${myId}/stars`]: newStars,
+    ...unitUpdates,
+  };
+
+  await update(ref(db, `rooms/${roomId}/gameState`), updates);
+  showStatus(`ターン終了 (+${earned}★)`);
+  selectedUnit = null;
+  highlightedHexes = [];
+  updateInfoPanel(null, null);
+  draw();
+}
+
+// ===== TECH =====
+function toggleTech() {
+  const overlay = document.getElementById('tech-overlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open')) renderTechGrid();
+}
+
+function renderTechGrid() {
+  const player = G.players[myId];
+  document.getElementById('tech-stars-count').textContent = player.stars;
+  const grid = document.getElementById('tech-grid');
+  grid.innerHTML = '';
+  Object.entries(TECHS).forEach(([id, tech]) => {
+    const owned = player.tech.includes(id);
+    const reqsMet = tech.requires.every(r => player.tech.includes(r));
+    const canAfford = player.stars >= tech.cost;
+    const card = document.createElement('div');
+    card.className = 'tech-card' + (owned ? ' owned' : (!reqsMet ? ' locked' : ''));
+    card.innerHTML = `
+      <div class="tech-icon">${tech.icon}</div>
+      <div class="tech-name">${tech.name}</div>
+      <div class="tech-cost">${owned ? '✓ 習得済み' : `${tech.cost}★`}</div>
+      <div class="tech-desc">${tech.desc}</div>
+      ${!owned && !reqsMet ? `<div class="tech-desc" style="color:var(--red);margin-top:4px">要: ${tech.requires.join(', ')}</div>` : ''}
+    `;
+    if (!owned && reqsMet) card.onclick = () => buyTech(id);
+    grid.appendChild(card);
+  });
+}
+
+async function buyTech(techId) {
+  if (!isMyTurn()) { showStatus('あなたのターンではありません'); return; }
+  const tech = TECHS[techId];
+  const player = G.players[myId];
+  if (player.stars < tech.cost) { showStatus('スターが足りません'); return; }
+  if (player.tech.includes(techId)) return;
+  const newTech = [...player.tech, techId];
+  await update(ref(db, `rooms/${roomId}/gameState`), {
+    [`players/${myId}/tech`]: newTech,
+    [`players/${myId}/stars`]: player.stars - tech.cost,
+  });
+  showStatus(`${tech.icon} ${tech.name}を習得！`);
+  renderTechGrid();
+}
+
+async function doBuildCity() {
+  if (!selectedHex || !isMyTurn()) return;
+  const tile = G.tiles[hexKey(selectedHex.q, selectedHex.r)];
+  if (tile?.building) { showStatus('既に建物があります'); return; }
+  const myStars = G.players[myId].stars;
+  if (myStars < 4) { showStatus('スターが足りません (4★必要)'); return; }
+  await update(ref(db, `rooms/${roomId}/gameState`), {
+    [`tiles/${hexKey(selectedHex.q, selectedHex.r)}/building`]: { type: 'city', owner: myId, level: 1 },
+    [`players/${myId}/stars`]: myStars - 4,
+  });
+  showStatus('🏛 都市を建設！');
+}
+
+async function doUpgradeCity() {
+  if (!selectedHex || !isMyTurn()) return;
+  const tile = G.tiles[hexKey(selectedHex.q, selectedHex.r)];
+  if (!tile?.building || tile.building.owner !== myId) return;
+  const cost = tile.building.level * 4;
+  if (G.players[myId].stars < cost) { showStatus(`スターが足りません (${cost}★必要)`); return; }
+  await update(ref(db, `rooms/${roomId}/gameState`), {
+    [`tiles/${hexKey(selectedHex.q, selectedHex.r)}/building/level`]: tile.building.level + 1,
+    [`players/${myId}/stars`]: G.players[myId].stars - cost,
+  });
+  showStatus('🏛 都市をレベルアップ！');
+}
+
+// ===== UI =====
+function updateInfoPanel(tile, unit) {
+  const title = document.getElementById('info-title');
+  const desc = document.getElementById('info-desc');
+  const stats = document.getElementById('info-stats');
+  const actions = document.getElementById('action-btns');
+  stats.innerHTML = '';
+  actions.innerHTML = '';
+
+  if (unit) {
+    const udef = UNITS[unit.type];
+    title.textContent = `${udef.icon} ${udef.name} (${G.players[unit.owner].name})`;
+    desc.textContent = `HP: ${unit.hp}/${udef.maxHp} | 攻撃: ${udef.atk} | 防御: ${udef.def} | 射程: ${udef.range}`;
+    stats.innerHTML = `
+      <div class="stat"><div class="stat-val">${unit.hp}</div><div class="stat-lbl">HP</div></div>
+      <div class="stat"><div class="stat-val">${udef.atk}</div><div class="stat-lbl">ATK</div></div>
+      <div class="stat"><div class="stat-val">${udef.def}</div><div class="stat-lbl">DEF</div></div>
+      <div class="stat"><div class="stat-val">${udef.move}</div><div class="stat-lbl">移動</div></div>
+    `;
+    if (unit.owner === myId && isMyTurn()) {
+      if (!unit.attacked) {
+        const atk = document.createElement('button');
+        atk.className = 'action-btn danger';
+        atk.textContent = '⚔ 攻撃モード';
+        atk.onclick = () => {
+          selectedUnit = unit;
+          highlightedHexes = getReachableHexes(unit);
+          draw();
+          showStatus('攻撃先を選んでください');
+        };
+        actions.appendChild(atk);
+      }
+    }
+  } else if (tile) {
+    const tileNames = { plains: '平原', forest: '森林', mountain: '山地', water: '海' };
+    title.textContent = `${tile.building ? buildingIcon(tile.building.type) + ' ' + buildingName(tile.building.type) : tileNames[tile.type]}`;
+    desc.textContent = `座標: (${tile.q}, ${tile.r})`;
+
+    if (tile.building && isMyTurn()) {
+      const b = tile.building;
+      if (b.owner === myId) {
+        // produce units
+        const available = Object.entries(UNITS).filter(([type, u]) => {
+          if (u.req && !G.players[myId].tech.includes(u.req)) return false;
+          return true;
+        });
+        available.forEach(([type, udef]) => {
+          const btn = document.createElement('button');
+          btn.className = 'action-btn';
+          btn.textContent = `${udef.icon} ${udef.name} (${udef.cost}★)`;
+          btn.disabled = G.players[myId].stars < udef.cost;
+          btn.onclick = () => doProduceUnit(type);
+          actions.appendChild(btn);
+        });
+        // upgrade
+        const upCost = b.level * 4;
+        const upBtn = document.createElement('button');
+        upBtn.className = 'action-btn';
+        upBtn.textContent = `⬆ 都市強化 (${upCost}★)`;
+        upBtn.disabled = G.players[myId].stars < upCost;
+        upBtn.onclick = doUpgradeCity;
+        actions.appendChild(upBtn);
+      }
+    } else if (!tile.building && isMyTurn() && tile.type !== 'water') {
+      const buildBtn = document.createElement('button');
+      buildBtn.className = 'action-btn';
+      buildBtn.textContent = '🏛 都市を建設 (4★)';
+      buildBtn.disabled = G.players[myId].stars < 4;
+      buildBtn.onclick = doBuildCity;
+      actions.appendChild(buildBtn);
+    }
+  } else {
+    title.textContent = 'マップをクリックして探索';
+    desc.textContent = '都市をクリックして開発、ユニットを選んで移動・攻撃。';
+  }
+}
+
+function buildingName(type) {
+  const names = { capital: '首都', city: '都市', farm: '農場', mine: '鉱山', port: '港' };
+  return names[type] || type;
+}
+
+function updateHUD() {
+  if (!G.players) return;
+  document.getElementById('p1-name').textContent = G.players.p1.name;
+  document.getElementById('p2-name').textContent = G.players.p2.name;
+  document.getElementById('p1-dot').style.background = PLAYER_COLORS.p1;
+  document.getElementById('p2-dot').style.background = PLAYER_COLORS.p2;
+  document.getElementById('turn-info').textContent = `ターン ${G.turn} — ${G.players[G.currentPlayer].name}の番`;
+  document.getElementById('my-stars').textContent = G.players[myId]?.stars || 0;
+  document.getElementById('btn-end-turn').disabled = !isMyTurn();
+
+  // winner
+  if (G.winner) {
+    document.getElementById('winner-overlay').classList.add('show');
+    document.getElementById('winner-name').textContent = `${G.players[G.winner].name}の勝利！`;
+  }
+}
+
+function isMyTurn() {
+  return G.currentPlayer === myId;
+}
+
+let statusTimer;
+function showStatus(msg) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ===== LOBBY FUNCTIONS =====
+window.createRoom = async function() {
+  const name = document.getElementById('player-name').value.trim() || 'プレイヤー1';
+  const tribe = document.getElementById('tribe-select').value;
+  roomId = 'ROOM-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  myId = 'p1';
+
+  await set(ref(db, `rooms/${roomId}`), {
+    status: 'waiting',
+    p1: { name, tribe },
+  });
+
+  startGameUI();
+  document.getElementById('waiting-banner').style.display = 'block';
+  document.getElementById('waiting-room-id').textContent = roomId;
+
+  // watch for p2 joining
+  onValue(ref(db, `rooms/${roomId}/p2`), async (snap) => {
+    if (snap.val()) {
+      document.getElementById('waiting-banner').style.display = 'none';
+      const p2Info = snap.val();
+      const p1Info = { name, tribe };
+      const gameState = initGameState(p1Info, p2Info);
+      await set(ref(db, `rooms/${roomId}/gameState`), gameState);
+      await update(ref(db, `rooms/${roomId}`), { status: 'playing' });
+      subscribeGame();
+    }
+  });
+};
+
+window.joinRoom = async function() {
+  const name = document.getElementById('player-name').value.trim() || 'プレイヤー2';
+  const tribe = document.getElementById('tribe-select').value;
+  const rid = document.getElementById('join-room-id').value.trim().toUpperCase();
+  if (!rid) { alert('ルームIDを入力してください'); return; }
+
+  const snap = await get(ref(db, `rooms/${rid}`));
+  if (!snap.val()) { alert('ルームが見つかりません'); return; }
+  if (snap.val().status === 'playing') { alert('このルームはすでに対戦中です'); return; }
+
+  roomId = rid;
+  myId = 'p2';
+  await update(ref(db, `rooms/${roomId}`), { p2: { name, tribe } });
+  startGameUI();
+  subscribeGame();
+};
+
+window.copyInviteLink = function() {
+  const url = `${location.href.split('?')[0]}?room=${roomId}`;
+  navigator.clipboard.writeText(url).then(() => showStatus('リンクをコピーしました！'));
+};
+
+function startGameUI() {
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  canvas = document.getElementById('gameCanvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  canvas.addEventListener('click', onCanvasClick);
+  canvas.addEventListener('mousedown', e => { isDragging = false; dragStart = { x: e.clientX - camX, y: e.clientY - camY }; });
+  canvas.addEventListener('mousemove', e => {
+    if (dragStart) {
+      isDragging = true;
+      camX = e.clientX - dragStart.x;
+      camY = e.clientY - dragStart.y;
+      draw();
+    }
+  });
+  canvas.addEventListener('mouseup', () => { dragStart = null; });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+  }, { passive: false });
+}
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  draw();
+}
+
+function subscribeGame() {
+  gameRef = ref(db, `rooms/${roomId}/gameState`);
+  onValue(gameRef, (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    G = data;
+    updateHUD();
+    draw();
+    if (isMyTurn()) showStatus('あなたのターンです！');
+  });
+}
+
+// ===== AUTO-JOIN FROM URL =====
+const urlParams = new URLSearchParams(location.search);
+const urlRoom = urlParams.get('room');
+if (urlRoom) {
+  document.getElementById('join-room-id').value = urlRoom;
+}
+</script>
+</body>
+</html>
